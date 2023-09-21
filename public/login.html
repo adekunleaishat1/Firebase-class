@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <title>Document</title>
+    <style>
+        body {
+            background-image: url(../715126.jpg);
+            opacity: 0.2;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 100%;
+            height: auto;
+        }
+
+        body:hover {
+            opacity: 1.0;
+        }
+
+        .form {
+            width: 450px;
+            height: 500px;
+            opacity: 1.5;
+            margin-top: 25%;
+            background-color: rgba(27, 5, 5, 0.295);
+        }
+
+        .in {
+            width: 75%;
+            height: 50px;
+            margin: 20px 60px;
+            border-radius: 5px;
+            background-color: rgba(199, 195, 195, 0.884);
+            border: 1px solid rgba(199, 195, 195, 0.884);
+
+        }
+
+        .in:focus-visible {
+            background-color: rgba(199, 195, 195, 0.884);
+            border: none;
+        }
+
+        .up {
+            color: white;
+            padding-top: 20px;
+            text-align: center;
+
+        }
+
+        .acc {
+            color: white;
+            font-size: 16px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <form class="form" action="">
+            <div class="up">
+                <h1>LOGIN</h1>
+            </div>
+            <input id="email" class="in" type="text" placeholder="email">
+            <input id="pass" class="in" type="password" placeholder="password">
+            <button onclick="login(event)" class="in">login</button>
+            <p class="acc"> Don't Have an Account ? <button onclick="sign(event)">Sign up</button></p>
+        </form>
+    </main>
+</body>
+
+</html>
+<script>
+     const firebaseConfig = {
+        apiKey: "AIzaSyBMKloGzMcfQyjcg8mdWjD-Je876VxQwno",
+        authDomain: "anything-cb915.firebaseapp.com",
+        projectId: "anything-cb915",
+        storageBucket: "anything-cb915.appspot.com",
+        messagingSenderId: "334643534977",
+        appId: "1:334643534977:web:cd3f7382154fc12def8180"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+</script>
+<script>
+    let email = document.getElementById("email")
+    let pass = document.getElementById("pass")
+    let username = document.getElementById("username")
+    let user_details = JSON.parse(localStorage.getItem("reg_user"))
+    function login(ev) {
+        ev.preventDefault();
+        let found = user_details.find((curr) => curr.email == email.value || curr.password == pass.value);
+        firebase.auth().signInWithEmailAndPassword(email.value, pass.value)
+        .then((userCredential) => {
+            // Signed in
+            var user = userCredential.user;
+            let curr_users  = firebase.auth().currentUser;
+            console.log(curr_users);
+            window.location.href = "dashboard.html"
+        })
+        .catch((error) => {
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            alert(errorMessage)
+        });
+    }
+    function sign(ev) {
+        ev.preventDefault()
+        window.location.href = "index.html"
+    }
+
+
+</script>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <title>Document</title>
+    <style>
+         body {
+            /* background-image: url(../715126.jpg);
+            opacity: 0.2; */
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 100%;
+            height: auto;
+        }
+        .form {
+            width: 450px;
+            height: 500px;
+            opacity: 1.5;
+            margin-top: 25%;
+            background-color: rgba(27, 5, 5, 0.295);
+        }
+        #in {
+            width: 200px;
+            height: 80px;
+        }
+
+        #output {
+            width: 200px;
+            height: 150px;
+        }
+        .in {
+            width: 75%;
+            height: 50px;
+            margin: 20px 60px;
+            border-radius: 5px;
+            background-color: rgba(199, 195, 195, 0.884);
+            border: 1px solid rgba(199, 195, 195, 0.884);
+
+        }
+        .up {
+            color: white;
+            padding-top: 20px;
+            text-align: center;
+
+        }
+        .dis{
+         width: 500px;
+         height:400px;
+         background-color: antiquewhite;
+        }
+    </style>
+</head>
+
+<body>
+    <main id="in">
+        <form class="form" action="">
+            <div class="up">
+                <h1>Blog</h1>
+            </div>
+            <input id="title" class="in" type="text" placeholder="what is happening">
+            <input id="image" class="in" type="file" multiple>
+            <textarea name="" id="content" class="in" cols="30" rows="10"></textarea>
+            <button class="in" onclick="postblog(event)">post</button>
+            <!-- <p class="acc"> Don't Have an Account ? <button onclick="sign(event)">log out</button></p> -->
+        </form>
+        <div class="dis">
+            <h1 id="title_con"></h1>
+            <div id="cap_con"></div>
+        </div>
+        <div>welcome to the chatbox <span id="name"></span></div>
+</body>
+
+</html>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBMKloGzMcfQyjcg8mdWjD-Je876VxQwno",
+        authDomain: "anything-cb915.firebaseapp.com",
+        projectId: "anything-cb915",
+        storageBucket: "anything-cb915.appspot.com",
+        messagingSenderId: "334643534977",
+        appId: "1:334643534977:web:cd3f7382154fc12def8180"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+</script>
+<script>
+    let name = document.getElementById("name")
+    let ima = document.getElementById("ima")
+    let cap_con = document.getElementById("cap_con")
+    let title_con = document.getElementById("title_con")
+    let title = document.getElementById("title")
+    let content = document.getElementById("content")
+
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            var uid = user.uid;
+            console.log(user);
+            name.innerHTML = user.displayName;
+        } else {
+            // User is signed out
+            // ...
+        }
+        });
+    function postblog(ev) {
+        ev.preventDefault();
+        let image = document.getElementById("image").files[0]
+        let imageName = image.name
+        let storageRef = firebase.storage().ref(imageName)
+        let uploadTask = storageRef.put(image);
+        uploadTask.on('state_changed',   (snapshot) => {
+        let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log('Upload is ' + progress + '% done');
+        },  (error) => {
+          console.log(error)
+          alert("image could not upload")
+        },  () => {
+            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+            console.log('File available at', downloadURL);
+            db.collection("blog").doc().set({
+            title: title.value,
+            content: content.value,
+            file: downloadURL,
+            Comment: [
+                {
+                  nameofcommentor:displayName,
+                  thepersoncomment:"",
+                }
+            ]
+        })
+            .then(() => {
+                console.log("Document successfully written!");
+                alert("post successful")
+            })
+            .catch((error) => {
+                console.error("Error writing document: ", error);
+                alert("post not successful")
+            });
+          });
+        })
+    }
+    function showblog(){
+     db.collection("blog").get().then((querySnapshot) => {
+       querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        console.log(doc.id, " => ", doc.data());
+        cap_con.innerHTML += `
+        <div class="profile">
+                <div class="pro"><p>A</p></div>
+                <div class="pro2">
+                    <p class="nam" id="name"></p>
+                    <p id="mail">@AishatAdekunle5</p>
+                </div>
+                <div class="pro3">
+                  <i class="fa fa-ellipsis"></i>
+                </div>
+          </div>
+        <p class="content">${doc.data().title}</p>
+        <img class="im" src='${doc.data().file}' />
+        <div>
+        <button onclick="showcom()"></button>
+        </div>
+        `
+       });
+     });
+    }
+    showblog()
+</script>
